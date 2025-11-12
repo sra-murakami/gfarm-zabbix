@@ -235,7 +235,7 @@ sub gfmd_process_exists ($) {
 		   join(' ', @command), $exitcode);
         $exists = 0;
     } elsif ($exists) {
-	log_notice('gfmd process exists: pid=%d', $pid);
+	log_notice('gfmd process exists: pid=%d', $gfmd_pid);
     } else {
 	log_notice('gfmd process not exists');
     }
