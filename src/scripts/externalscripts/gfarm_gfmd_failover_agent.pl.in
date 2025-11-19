@@ -371,8 +371,8 @@ sub promote_gfmd ($$$) {
     my $result = 1;
     if (kill('USR1' => $gfmd_pid) > 0) {
         log_notice('send SIGUSR1 to gfmd: pid=%d', $gfmd_pid);
-	log_notice('begin waiting until gfmd listens on the port: port=%s:%d',
-		   $address, $port);
+        log_notice('begin waiting until gfmd listens on the port: port=%s:%d',
+                   $address, $port);
         while (!gfmd_is_listening($address, $port)) {
             sleep(PROMPTION_CHECK_INTERVAL);
         }
