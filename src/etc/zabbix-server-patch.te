@@ -1,4 +1,4 @@
-module zabbix-server-centos7 1.0;
+module zabbix-server 1.0;
 
 require {
         type zabbix_var_run_t;

@@ -1,4 +1,4 @@
-module zabbix-agent-gfarm-centos7 1.0;
+module zabbix-agent-gfarm 1.0;
 
 require {
 	type devlog_t;

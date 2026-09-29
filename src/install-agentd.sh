@@ -8,11 +8,25 @@
 # install(1) command.
 INSTALL=install
 
-# Directory where external scripts for Zabbix reside.
-ZABBIX_EXTSCRIPTDIR=$ZABBIX_CONFDIR/externalscripts
+: ${ZABBIX_EXTSCRIPTDIR:=/etc/zabbix/externalscripts}
 
-# Directory where configuration files for Zabbix agentd reside.
-ZABBIX_AGENTD_CONFSUBDIR=$ZABBIX_CONFDIR/zabbix_agentd.d
+# Auto-detect the Zabbix agent executable and
+# its user configuration directory if not specified.
+if [ -x "${ZABBIX_PREFIX}/sbin/zabbix_agent2" ]; then
+    : ${ZABBIX_AGENTD_CONFSUBDIR:=/etc/zabbix/zabbix_agent2.d}
+    : ${ZABBIX_AGENT_BIN:="${ZABBIX_PREFIX}/sbin/zabbix_agent2"}
+elif [ -x "${ZABBIX_PREFIX}/sbin/zabbix_agentd" ]; then
+    : ${ZABBIX_AGENTD_CONFSUBDIR:=/etc/zabbix/zabbix_agentd.d}
+    : ${ZABBIX_AGENT_BIN:="${ZABBIX_PREFIX}/sbin/zabbix_agentd"}
+elif [ -x "${ZABBIX_PREFIX}/sbin/zabbix_agent" ]; then
+    : ${ZABBIX_AGENTD_CONFSUBDIR:=/etc/zabbix/zabbix_agentd.d}
+    : ${ZABBIX_AGENT_BIN:="${ZABBIX_PREFIX}/sbin/zabbix_agent"}
+else
+    echo >&2 \
+        "ERROR: No Zabbix agent executable found under ${ZABBIX_PREFIX}/sbin"
+    echo >&2 "ERROR: check ZABBIX_PREFIX setting in install.conf"
+    exit 1
+fi
 
 # User name of Zabbix.
 ZABBIX_USER=zabbix
@@ -47,21 +61,12 @@ create_file()
         -e "s|@PGUSER@|$PGUSER|g" \
         -e "s|@PGPASSWORD@|$PGPASSWORD|g" \
         -e "s|@ZABBIX_PREFIX@|$ZABBIX_PREFIX|g" \
-        -e "s|@ZABBIX_CONFDIR@|$ZABBIX_CONFDIR|g" \
+        -e "s|@ZABBIX_AGENT_BIN@|$ZABBIX_AGENT_BIN|g" \
+        -e "s|@ZABBIX_HOMEDIR@|$ZABBIX_HOMEDIR|g" \
         -e "s|@ZABBIX_EXTSCRIPTDIR@|$ZABBIX_EXTSCRIPTDIR|g" \
         -e "s|@ZABBIX_SYSLOG_FACILITY@|$ZABBIX_SYSLOG_FACILITY|g" \
         "$1.in" > "$1"
 }
-
-#
-# Is $ZABBIX_PREFIX setting correct?
-#
-if [ ! -x "${ZABBIX_PREFIX}/sbin/zabbix_agent" -a \
-     ! -x "${ZABBIX_PREFIX}/sbin/zabbix_agentd" ]; then
-  echo >&2 "ERROR: ${ZABBIX_PREFIX}/sbin/zabbix_agent does not exist"
-  echo >&2 "ERROR: check ZABBIX_PREFIX setting in install.conf"
-  exit 1
-fi
 
 #
 # Get parameters for accessing PostgreSQL.
